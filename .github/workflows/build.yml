@@ -42,28 +42,18 @@ jobs:
           cache: true
       - run: flutter pub get
 
-      # ═══════════════════════════════════════════════════════════════
-      # 🌟 الإصلاح السحري: حفظ مفتاح التوقيع وتكرار استخدامه
-      # ═══════════════════════════════════════════════════════════════
-      - name: Cache Android Debug Keystore
-        uses: actions/cache@v4
-        with:
-          path: ~/.android/debug.keystore
-          key: android-debug-keystore-v1
-
-      - name: Decode release keystore
+      # فك تشفير المفتاح الثابت
+      - name: Decode keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-        if: ${{ env.KEYSTORE_BASE64 != '' }}
         run: echo "$KEYSTORE_BASE64" | base64 --decode > android/my-release-key.jks
 
+      # إنشاء key.properties
       - name: Create key.properties
         env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        if: ${{ env.KEYSTORE_BASE64 != '' }}
         run: |
           cat > android/key.properties << PROPS
           storePassword=$KEYSTORE_PASSWORD
@@ -75,17 +65,8 @@ jobs:
       - name: Build APK (release)
         run: flutter build apk --release
 
-      - name: Build App Bundle (AAB)
-        run: flutter build appbundle --release
-
       - uses: actions/upload-artifact@v4
         with:
           name: etizan-apk
           path: build/app/outputs/flutter-apk/app-release.apk
-          retention-days: 30
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: etizan-aab
-          path: build/app/outputs/bundle/release/app-release.aab
           retention-days: 30
