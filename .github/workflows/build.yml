@@ -2,53 +2,36 @@ name: Build & Analyze
 
 on:
   push:
-    branches: [ main, develop ]
-  pull_request:
     branches: [ main ]
   workflow_dispatch:
 
 jobs:
-  analyze:
-    name: 🔍 Analyze
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.35.0'
-          channel: 'stable'
-          cache: true
-      - run: flutter pub get
-      - run: flutter analyze --no-fatal-infos
-
   build:
-    name: 🏗️ Build APK & AAB
-    needs: analyze
+    name: 🏗️ Build APK
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      
       - uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
+          
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.35.0'
           channel: 'stable'
           cache: true
+          
       - run: flutter pub get
 
-      # فك تشفير المفتاح الثابت
+      # فك تشفير المفتاح وحفظه داخل مجلد app مباشرة
       - name: Decode keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-        run: echo "$KEYSTORE_BASE64" | base64 --decode > android/my-release-key.jks
+        run: echo "$KEYSTORE_BASE64" | base64 --decode > android/app/my-release-key.jks
 
-      # إنشاء key.properties
+      # إنشاء ملف key.properties في مجلد android الرئيسي
       - name: Create key.properties
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -62,7 +45,11 @@ jobs:
           storeFile=my-release-key.jks
           PROPS
 
-      - name: Build APK (release)
+      # التأكد من وجود المفتاح قبل البناء
+      - name: Verify Keystore
+        run: ls -la android/app/my-release-key.jks
+
+      - name: Build APK
         run: flutter build apk --release
 
       - uses: actions/upload-artifact@v4

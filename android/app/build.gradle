@@ -8,12 +8,10 @@ if (localPropertiesFile.exists()) {
 
 def keystoreProperties = new Properties()
 def keystorePropertiesFile = rootProject.file('key.properties')
-def hasReleaseKeystore = false
-
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-    def storeFile = file(keystoreProperties['storeFile'])
-    hasReleaseKeystore = storeFile.exists()
+} else {
+    throw new GradleException("❌ ملف key.properties غير موجود! تأكد من إعداد GitHub Secrets بشكل صحيح.")
 }
 
 apply plugin: 'com.android.application'
@@ -39,43 +37,24 @@ android {
         applicationId = "com.yourname.my_worship"
         minSdk = 23
         targetSdk = 34
-        versionCode = 11
-        versionName = "1.6.1"
+        versionCode = 12
+        versionName = "1.6.2"
     }
 
     signingConfigs {
         release {
-            if (hasReleaseKeystore) {
-                keyAlias = keystoreProperties['keyAlias']
-                keyPassword = keystoreProperties['keyPassword']
-                storeFile = file(keystoreProperties['storeFile'])
-                storePassword = keystoreProperties['storePassword']
-            }
-        }
-        debug {
-            if (hasReleaseKeystore) {
-                keyAlias = keystoreProperties['keyAlias']
-                keyPassword = keystoreProperties['keyPassword']
-                storeFile = file(keystoreProperties['storeFile'])
-                storePassword = keystoreProperties['storePassword']
-            }
+            keyAlias = keystoreProperties['keyAlias']
+            keyPassword = keystoreProperties['keyPassword']
+            storeFile = file(keystoreProperties['storeFile'])
+            storePassword = keystoreProperties['storePassword']
         }
     }
 
     buildTypes {
         release {
-            if (hasReleaseKeystore) {
-                signingConfig = signingConfigs.release
-            } else {
-                signingConfig = signingConfigs.debug
-            }
+            signingConfig = signingConfigs.release
             minifyEnabled = false
             shrinkResources = false
-        }
-        debug {
-            if (hasReleaseKeystore) {
-                signingConfig = signingConfigs.release
-            }
         }
     }
 }
