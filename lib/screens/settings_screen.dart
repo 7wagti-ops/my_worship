@@ -6,7 +6,7 @@ import '../providers/settings_provider.dart';
 import '../providers/sync_provider.dart';
 import '../services/notification_service.dart';
 import '../services/supabase_service.dart';
-import 'supabase_debug_screen.dart';
+import 'cloud_storage_debug_screen.dart';
 import 'manage_tabs_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -55,16 +55,13 @@ class SettingsScreen extends StatelessWidget {
               title: Text(m.label),
               subtitle: Text(m.hint, style: const TextStyle(fontSize: 12)),
               trailing: Icon(
-                selected
-                    ? Icons.radio_button_checked
-                    : Icons.radio_button_unchecked,
+                selected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
                 color: selected ? primary : Colors.grey,
               ),
               onTap: () => s.setTabViewMode(m),
             );
           }),
 
-          // ═══ استعادة الحالة ═══
           const Divider(),
           const _Header('استعادة الحالة'),
           SwitchListTile(
@@ -77,7 +74,6 @@ class SettingsScreen extends StatelessWidget {
             secondary: const Icon(Icons.restore),
           ),
 
-          // ═══ التبويبات (بدون الأقسام) ═══
           const Divider(),
           const _Header('التبويبات الأساسية'),
           SwitchListTile(
@@ -114,7 +110,6 @@ class SettingsScreen extends StatelessWidget {
             onChanged: s.setShowFasting,
           ),
 
-          // ═══ التبويبات المخصصة ═══
           if (user != null) ...[
             const Divider(),
             const _Header('التبويبات المخصصة'),
@@ -156,8 +151,7 @@ class SettingsScreen extends StatelessWidget {
             onTap: () async {
               final r = await showTimePicker(
                 context: context,
-                initialTime:
-                    TimeOfDay(hour: s.notifyHour, minute: s.notifyMinute),
+                initialTime: TimeOfDay(hour: s.notifyHour, minute: s.notifyMinute),
               );
               if (r != null) {
                 s.setNotifTime(r.hour, r.minute);
@@ -175,15 +169,15 @@ class SettingsScreen extends StatelessWidget {
           ),
 
           const Divider(),
-          const _Header('المزامنة'),
+          const _Header('التخزين السحابي والمزامنة'),
           ListTile(
             leading: Icon(_iconForSync(sync.status)),
-            title: const Text('الحالة'),
+            title: const Text('حالة المزامنة'),
             subtitle: Text(sync.lastError ?? sync.status.name),
           ),
           ListTile(
-            leading: const Icon(Icons.cloud_upload),
-            title: const Text('فحص الاتصال بـ Supabase'),
+            leading: const Icon(Icons.cloud_upload_outlined),
+            title: const Text('فحص الاتصال بالتخزين السحابي'),
             onTap: () async {
               final (ok, err) = await SupabaseService.ping();
               if (context.mounted) {
@@ -194,12 +188,12 @@ class SettingsScreen extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.bug_report),
-            title: const Text('فحص مفصل'),
+            leading: const Icon(Icons.bug_report_outlined),
+            title: const Text('فحص مفصل للتخزين السحابي'),
             trailing: const Icon(Icons.arrow_forward_ios, size: 14),
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const SupabaseDebugScreen()),
+              MaterialPageRoute(builder: (_) => const CloudStorageDebugScreen()),
             ),
           ),
           const SizedBox(height: 20),
