@@ -520,6 +520,7 @@ class WorkoutEntry {
   final String entryDate;
   bool isDone;
   final bool isRest;
+  List<String> exercises;
   String note;
 
   WorkoutEntry({
@@ -527,14 +528,16 @@ class WorkoutEntry {
     required this.entryDate,
     this.isDone = false,
     this.isRest = false,
+    List<String>? exercises,
     this.note = '',
-  });
+  }) : exercises = exercises ?? [];
 
   Map<String, dynamic> toJson() => {
         'entry_number': entryNumber,
         'entry_date': entryDate,
         'is_done': isDone,
         'is_rest': isRest,
+        'exercises': exercises,
         'note': note,
       };
 
@@ -543,6 +546,7 @@ class WorkoutEntry {
         entryDate: j['entry_date'] ?? '',
         isDone: j['is_done'] ?? false,
         isRest: j['is_rest'] ?? false,
+        exercises: List<String>.from(j['exercises'] ?? []),
         note: j['note'] ?? '',
       );
 }
@@ -550,16 +554,34 @@ class WorkoutEntry {
 class WorkoutConfig {
   int workoutDays;
   int restDays;
+  List<List<String>> routines; // القوالب الدورية للتمارين
 
-  WorkoutConfig({this.workoutDays = 3, this.restDays = 1});
+  WorkoutConfig({
+    this.workoutDays = 3,
+    this.restDays = 1,
+    List<List<String>>? routines,
+  }) : routines = routines ?? [];
 
-  Map<String, dynamic> toJson() =>
-      {'workout_days': workoutDays, 'rest_days': restDays};
+  Map<String, dynamic> toJson() => {
+        'workout_days': workoutDays,
+        'rest_days': restDays,
+        'routines': routines,
+      };
 
-  factory WorkoutConfig.fromJson(Map<String, dynamic> j) => WorkoutConfig(
-        workoutDays: j['workout_days'] ?? 3,
-        restDays: j['rest_days'] ?? 1,
-      );
+  factory WorkoutConfig.fromJson(Map<String, dynamic> j) {
+    final cfg = WorkoutConfig(
+      workoutDays: j['workout_days'] ?? 3,
+      restDays: j['rest_days'] ?? 1,
+      routines: (j['routines'] as List? ?? [])
+          .map((e) => List<String>.from(e))
+          .toList(),
+    );
+    // تأكد أن عدد القوالب يساوي عدد أيام التمرين
+    while (cfg.routines.length < cfg.workoutDays) {
+      cfg.routines.add([]);
+    }
+    return cfg;
+  }
 }
 
 class FastingEntry {

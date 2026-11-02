@@ -679,23 +679,29 @@ class _MainShellState extends State<MainShell> {
     final cfg = user.workoutConfig;
     if (cfg.workoutDays <= 0) return;
     final today = DateTime.now();
-    var isRest = false;
-    var count = 0;
+    
+    // التأكد من وجود القوالب
+    while (cfg.routines.length < cfg.workoutDays) {
+      cfg.routines.add([]);
+    }
+
     for (var i = 0; i < 60; i++) {
-      if (!isRest && count >= cfg.workoutDays) {
-        isRest = true;
-        count = 0;
-      } else if (isRest && count >= cfg.restDays) {
-        isRest = false;
-        count = 0;
+      final cycleLength = cfg.workoutDays + cfg.restDays;
+      final cycleIndex = i % cycleLength;
+      final isRest = cycleIndex >= cfg.workoutDays;
+      
+      List<String> exercises = [];
+      if (!isRest && cycleIndex < cfg.routines.length) {
+        exercises = List.from(cfg.routines[cycleIndex]);
       }
+
       user.workoutEntries.add(WorkoutEntry(
         entryNumber: i + 1,
         entryDate:
             today.add(Duration(days: i)).toIso8601String().substring(0, 10),
         isRest: isRest,
+        exercises: exercises,
       ));
-      count++;
     }
   }
 }

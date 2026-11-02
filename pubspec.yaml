@@ -1,7 +1,7 @@
 name: my_worship
 description: "وقتي — My Time"
 publish_to: 'none'
-version: 1.7.1+15
+version: 1.8.0+16
 
 environment:
   sdk: '>=3.3.0 <4.0.0'
