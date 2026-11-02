@@ -3,9 +3,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models.dart';
 
 class SupabaseService {
-  static const String url = 'https://sjckmzxpckrpdkirqarq.supabase.co';
+  // ═══════════════════════════════════════════════════════════════
+  //  إعدادات Supabase الجديدة
+  // ═══════════════════════════════════════════════════════════════
+  static const String url = 'https://faznulfuvjrjxeoeeltp.supabase.co';
   static const String publishableKey =
-      'sb_publishable_-QWXHP0cozr-PeOdWPauhw_abrpBLZY';
+      'sb_publishable_q8RieDS7bhnj1zX3c5wTQg_5F51o00P';
 
   static SupabaseClient get client => Supabase.instance.client;
 
