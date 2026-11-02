@@ -25,13 +25,14 @@ jobs:
           
       - run: flutter pub get
 
-      # فك تشفير المفتاح وحفظه داخل مجلد app مباشرة
+      # فك تشفير المفتاح مع حذف أي مسافات أو أسطر جديدة
       - name: Decode keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-        run: echo "$KEYSTORE_BASE64" | base64 --decode > android/app/my-release-key.jks
+        run: |
+          echo "$KEYSTORE_BASE64" | tr -d '\n\r ' | base64 -d > android/app/my-release-key.jks
 
-      # إنشاء ملف key.properties في مجلد android الرئيسي
+      # إنشاء key.properties
       - name: Create key.properties
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -45,9 +46,9 @@ jobs:
           storeFile=my-release-key.jks
           PROPS
 
-      # التأكد من وجود المفتاح قبل البناء
+      # التأكد من سلامة المفتاح
       - name: Verify Keystore
-        run: ls -la android/app/my-release-key.jks
+        run: keytool -list -v -keystore android/app/my-release-key.jks -storepass MyWorship2025
 
       - name: Build APK
         run: flutter build apk --release
